@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Commission Calculator</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:#f5f5f5;color:#1a1a1a;padding:2rem}
+h2{font-size:20px;font-weight:500;margin-bottom:1.25rem}
+h3{font-size:12px;font-weight:500;color:#666;margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:1.25rem}
+.card{background:#fff;border:0.5px solid #ddd;border-radius:12px;padding:1rem}
+.field{display:flex;flex-direction:column;gap:4px}
+label{font-size:13px;color:#666}
+input[type=number]{width:100%;font-size:14px;padding:6px 10px;border:0.5px solid #ccc;border-radius:8px;outline:none;background:#fff;color:#1a1a1a}
+input[type=number]:focus{border-color:#888}
+.derived{font-size:14px;padding:6px 10px;background:#f0f0f0;border-radius:8px;color:#1a1a1a;font-weight:500;border:0.5px solid #ddd}
+.tier-card{background:#fff;border:0.5px solid #ddd;border-radius:12px;padding:1rem;margin-bottom:12px}
+.tier-title{font-size:15px;font-weight:500;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.badge{font-size:11px;padding:2px 8px;border-radius:8px;background:#f0f0f0;color:#666}
+.gp-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:4px}
+.cur-label{font-size:11px;color:#999;margin-bottom:3px}
+.result-section{margin-top:1.5rem}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:right;padding:8px 10px;font-weight:500;font-size:12px;color:#666;border-bottom:0.5px solid #ddd;white-space:nowrap;background:#f8f8f8}
+th:first-child{text-align:left}
+td{text-align:right;padding:8px 10px;border-bottom:0.5px solid #eee}
+td:first-child{text-align:left;font-weight:500}
+tr.total{background:#f8f8f8}
+tr.total td{font-weight:500;border-top:0.5px solid #ccc;border-bottom:none}
+.metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:1.25rem}
+.metric{background:#f0f0f0;border-radius:8px;padding:.75rem 1rem}
+.metric-label{font-size:12px;color:#666;margin-bottom:4px}
+.metric-val{font-size:20px;font-weight:500}
+.ratio-bar{height:8px;border-radius:4px;background:#e0e0e0;margin:8px 0 12px;overflow:hidden;display:flex}
+.ratio-m1{background:#378ADD;height:100%}
+.ratio-m2{background:#1D9E75;height:100%}
+.dot-m1{width:10px;height:10px;border-radius:50%;background:#378ADD;display:inline-block;margin-right:4px}
+.dot-m2{width:10px;height:10px;border-radius:50%;background:#1D9E75;display:inline-block;margin-right:4px}
+.legend{display:flex;gap:16px;font-size:12px;color:#666;margin-bottom:4px}
+.pos{color:#1a7a4a}
+.formula-hint{font-size:11px;color:#999;margin-top:4px}
+.split-wrap{display:flex;gap:6px;align-items:center}
+.split-wrap span{font-size:13px;color:#666}
+.scen-table{width:100%;border-collapse:collapse;font-size:13px}
+.scen-table th{text-align:right;padding:7px 10px;font-weight:500;font-size:11px;color:#666;border-bottom:0.5px solid #ddd;white-space:nowrap;background:#f8f8f8}
+.scen-table th:first-child{text-align:left}
+.scen-table td{text-align:right;padding:7px 10px;border-bottom:0.5px solid #eee;font-size:12px}
+.scen-table td:first-child{text-align:left}
+.scen-table tr.cur td{color:#1a7a4a;font-weight:500;background:#e8f5ee}
+.tier-head{font-size:12px;font-weight:500;color:#666;padding:6px 10px;background:#f8f8f8;border-bottom:0.5px solid #ddd}
+.pct-pill{display:inline-block;padding:1px 7px;border-radius:10px;font-size:11px;font-weight:500}
+</style>
+</head>
+<body>
+<h2>Commission calculator</h2>
+
+<div class="card" style="margin-bottom:12px">
+  <h3>Global settings</h3>
+  <div class="grid">
+    <div class="field">
+      <label>Exchange rate (THB/USD)</label>
+      <input type="number" id="exRate" value="35" min="1">
+    </div>
+    <div class="field">
+      <label>Salary M1 (THB / month)</label>
+      <input type="number" id="salM1" value="100000" min="0">
+    </div>
+    <div class="field">
+      <label>Salary % : Commission %</label>
+      <div class="split-wrap">
+        <input type="number" id="salPct" value="60" min="1" max="99" style="width:60px">
+        <span>:</span>
+        <input type="number" id="comPct" value="40" min="1" max="99" style="width:60px">
+      </div>
+    </div>
+    <div class="field">
+      <label>Commission THB (100% achievement)</label>
+      <div class="derived" id="comTHB-display">฿800,000</div>
+      <div class="formula-hint">= Salary M1 ÷ Salary% × Com% × 12</div>
+    </div>
+  </div>
+  <div style="margin-top:8px">
+    <label style="font-size:13px;color:#666">Ratio M1 : M2 (tier split)</label>
+    <div class="split-wrap" style="margin-top:4px">
+      <input type="number" id="ratM1" value="50" min="1" max="99" style="width:60px">
+      <span>:</span>
+      <input type="number" id="ratM2" value="50" min="1" max="99" style="width:60px">
+    </div>
+  </div>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1.25rem">
+  <div class="tier-card">
+    <div class="tier-title"><span class="dot-m1"></span>M1 tier <span class="badge" id="b-m1r">50%</span></div>
+    <div class="field" style="margin-bottom:12px"><label>Quota M1 (USD)</label><input type="number" id="qM1" value="500000" min="0"></div>
+    <h3>Project GP</h3>
+    <div class="gp-row">
+      <div><div class="cur-label">USD</div><input type="number" id="gpM1usd" value="1000" min="0"></div>
+      <div><div class="cur-label">THB</div><input type="number" id="gpM1thb" value="35000" min="0"></div>
+    </div>
+  </div>
+  <div class="tier-card">
+    <div class="tier-title"><span class="dot-m2"></span>M2 tier <span class="badge" id="b-m2r">50%</span></div>
+    <div class="field" style="margin-bottom:12px"><label>Quota M2 (USD)</label><input type="number" id="qM2" value="8000000" min="0"></div>
+    <h3>Project Rev</h3>
+    <div class="gp-row">
+      <div><div class="cur-label">USD</div><input type="number" id="gpM2usd" value="5000000" min="0"></div>
+      <div><div class="cur-label">THB</div><input type="number" id="gpM2thb" value="175000000" min="0"></div>
+    </div>
+  </div>
+</div>
+
+<div class="result-section">
+  <h3>Results</h3>
+  <div class="metric-grid" id="metrics"></div>
+  <div class="legend"><span><span class="dot-m1"></span>M1</span><span><span class="dot-m2"></span>M2</span></div>
+  <div class="ratio-bar"><div class="ratio-m1" id="rbar-m1" style="width:50%"></div><div class="ratio-m2" id="rbar-m2" style="width:50%"></div></div>
+  <table>
+    <thead><tr>
+      <th>Tier</th><th>Ratio</th><th>Achieve paid (THB)</th><th>Quota (USD)</th><th>Project GP / Rev (USD)</th><th>Commission (USD)</th><th>Commission (THB)</th>
+    </tr></thead>
+    <tbody id="tbody"></tbody>
+  </table>
+</div>
+
+<div class="result-section" style="margin-top:2rem">
+  <h3>Achievement scenarios</h3>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+    <div class="card" style="padding:0;overflow:hidden">
+      <div class="tier-head"><span class="dot-m1"></span> M1 tier — GP target &amp; commission</div>
+      <table class="scen-table">
+        <thead><tr>
+          <th>Achievement</th><th>GP target (USD)</th><th>GP target (THB)</th><th>Commission (THB)</th>
+        </tr></thead>
+        <tbody id="scen-m1"></tbody>
+      </table>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <div class="tier-head"><span class="dot-m2"></span> M2 tier — Rev target &amp; commission</div>
+      <table class="scen-table">
+        <thead><tr>
+          <th>Achievement</th><th>Rev target (USD)</th><th>Rev target (THB)</th><th>Commission (THB)</th>
+        </tr></thead>
+        <tbody id="scen-m2"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+let updating=false;
+const SCENARIOS=[50,75,100,125,150];
+
+function fmt(n){return Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}
+function fmtI(n){return Number(n).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0})}
+function getEx(){return parseFloat(document.getElementById('exRate').value)||35}
+
+function syncGP(changed){
+  if(updating)return;
+  updating=true;
+  const ex=getEx();
+  if(changed==='m1usd'){const v=parseFloat(document.getElementById('gpM1usd').value)||0;document.getElementById('gpM1thb').value=Math.round(v*ex);}
+  else if(changed==='m1thb'){const v=parseFloat(document.getElementById('gpM1thb').value)||0;document.getElementById('gpM1usd').value=(v/ex).toFixed(2);}
+  else if(changed==='m2usd'){const v=parseFloat(document.getElementById('gpM2usd').value)||0;document.getElementById('gpM2thb').value=Math.round(v*ex);}
+  else if(changed==='m2thb'){const v=parseFloat(document.getElementById('gpM2thb').value)||0;document.getElementById('gpM2usd').value=(v/ex).toFixed(2);}
+  updating=false;
+  calc();
+}
+
+function calc(){
+  const ex=getEx();
+  const salM1=parseFloat(document.getElementById('salM1').value)||0;
+  const salPct=(parseFloat(document.getElementById('salPct').value)||60)/100;
+  const comPct=(parseFloat(document.getElementById('comPct').value)||40)/100;
+  const r1=parseFloat(document.getElementById('ratM1').value)||50;
+  const r2=parseFloat(document.getElementById('ratM2').value)||50;
+  const total_r=r1+r2;
+  const qM1=parseFloat(document.getElementById('qM1').value)||1;
+  const qM2=parseFloat(document.getElementById('qM2').value)||1;
+  const gpM1=parseFloat(document.getElementById('gpM1usd').value)||0;
+  const gpM2=parseFloat(document.getElementById('gpM2usd').value)||0;
+
+  const comTHB=salPct>0?(salM1/salPct)*comPct*12:0;
+  document.getElementById('comTHB-display').textContent='฿'+fmt(comTHB);
+
+  const achM1=comTHB*(r1/total_r);
+  const achM2=comTHB*(r2/total_r);
+  const comUsdM1=gpM1*(achM1/qM1);
+  const comUsdM2=gpM2*(achM2/qM2);
+  const comTHBM1=comUsdM1*ex;
+  const comTHBM2=comUsdM2*ex;
+
+  document.getElementById('b-m1r').textContent=Math.round(r1*100/total_r)+'%';
+  document.getElementById('b-m2r').textContent=Math.round(r2*100/total_r)+'%';
+  document.getElementById('rbar-m1').style.width=(r1/total_r*100)+'%';
+  document.getElementById('rbar-m2').style.width=(r2/total_r*100)+'%';
+
+  const totalComUsd=comUsdM1+comUsdM2;
+  const totalComTHB=comTHBM1+comTHBM2;
+
+  document.getElementById('metrics').innerHTML=`
+    <div class="metric"><div class="metric-label">Commission THB (100%)</div><div class="metric-val">฿${fmtI(comTHB)}</div></div>
+    <div class="metric"><div class="metric-label">Total commission (THB)</div><div class="metric-val pos">฿${fmtI(totalComTHB)}</div></div>
+    <div class="metric"><div class="metric-label">Total commission (USD)</div><div class="metric-val pos">$${fmtI(totalComUsd)}</div></div>
+    <div class="metric"><div class="metric-label">M1 achievement</div><div class="metric-val">${fmt(gpM1/qM1*100)}%</div></div>
+    <div class="metric"><div class="metric-label">M2 achievement</div><div class="metric-val">${fmt(gpM2/qM2*100)}%</div></div>
+  `;
+
+  document.getElementById('tbody').innerHTML=`
+    <tr>
+      <td><span class="dot-m1"></span>M1</td><td>${Math.round(r1*100/total_r)}</td>
+      <td>฿${fmt(achM1)}</td><td>$${fmt(qM1)}</td><td>$${fmt(gpM1)}</td>
+      <td>$${fmt(comUsdM1)}</td><td>฿${fmt(comTHBM1)}</td>
+    </tr>
+    <tr>
+      <td><span class="dot-m2"></span>M2</td><td>${Math.round(r2*100/total_r)}</td>
+      <td>฿${fmt(achM2)}</td><td>$${fmt(qM2)}</td><td>$${fmt(gpM2)}</td>
+      <td>$${fmt(comUsdM2)}</td><td>฿${fmt(comTHBM2)}</td>
+    </tr>
+    <tr class="total">
+      <td>Total</td><td>${total_r}</td>
+      <td>฿${fmt(achM1+achM2)}</td><td>$${fmt(qM1+qM2)}</td><td>$${fmt(gpM1+gpM2)}</td>
+      <td>$${fmt(totalComUsd)}</td><td>฿${fmt(totalComTHB)}</td>
+    </tr>
+  `;
+
+  const curAchM1=qM1>0?gpM1/qM1*100:0;
+  const curAchM2=qM2>0?gpM2/qM2*100:0;
+
+  function scenRows(quota,achPaid,curAch,ex,tbodyId){
+    let html='';
+    SCENARIOS.forEach(pct=>{
+      const gpTarget=quota*(pct/100);
+      const gpTargetThb=gpTarget*ex;
+      const comThb=gpTarget*(achPaid/quota)*ex;
+      const isCur=Math.abs(curAch-pct)<0.5;
+      const cls=isCur?'cur':'';
+      const pill=isCur
+        ?`<span class="pct-pill" style="background:#e8f5ee;color:#1a7a4a">${pct}% ★</span>`
+        :`<span class="pct-pill" style="background:#f0f0f0;color:#666">${pct}%</span>`;
+      html+=`<tr class="${cls}"><td>${pill}</td><td>$${fmtI(gpTarget)}</td><td>฿${fmtI(gpTargetThb)}</td><td>฿${fmtI(comThb)}</td></tr>`;
+    });
+    document.getElementById(tbodyId).innerHTML=html;
+  }
+
+  scenRows(qM1,achM1,curAchM1,ex,'scen-m1');
+  scenRows(qM2,achM2,curAchM2,ex,'scen-m2');
+}
+
+document.getElementById('gpM1usd').addEventListener('input',()=>syncGP('m1usd'));
+document.getElementById('gpM1thb').addEventListener('input',()=>syncGP('m1thb'));
+document.getElementById('gpM2usd').addEventListener('input',()=>syncGP('m2usd'));
+document.getElementById('gpM2thb').addEventListener('input',()=>syncGP('m2thb'));
+
+['exRate','salM1','salPct','comPct','ratM1','ratM2','qM1','qM2'].forEach(id=>{
+  document.getElementById(id).addEventListener('input',()=>{
+    if(id==='exRate'){syncGP('m1usd');syncGP('m2usd');}else{calc();}
+  });
+});
+
+calc();
+</script>
+</body>
+</html>
