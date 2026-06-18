@@ -52,6 +52,8 @@ tr.total td{font-weight:500;border-top:0.5px solid #ccc;border-bottom:none}
 .scen-table tr.cur td{color:#1a7a4a;font-weight:500;background:#e8f5ee}
 .tier-head{font-size:12px;font-weight:500;color:#666;padding:6px 10px;background:#f8f8f8;border-bottom:0.5px solid #ddd}
 .pct-pill{display:inline-block;padding:1px 7px;border-radius:10px;font-size:11px;font-weight:500}
+button{font-size:13px;padding:7px 14px;border-radius:8px;border:0.5px solid #ccc;background:#f0f0f0;color:#1a1a1a;cursor:pointer}
+button:hover{background:#e6e6e6}
 </style>
 </head>
 <body>
@@ -97,6 +99,10 @@ tr.total td{font-weight:500;border-top:0.5px solid #ccc;border-bottom:none}
       <span>:</span>
       <input type="number" id="ratM2" value="50" min="1" max="99" style="width:60px">
     </div>
+  </div>
+  <div style="margin-top:12px;display:flex;align-items:center;gap:10px">
+    <button type="button" id="saveBtn">Save to local storage</button>
+    <span id="saveMsg" style="font-size:12px;color:#1a7a4a"></span>
   </div>
 </div>
 
@@ -158,6 +164,28 @@ tr.total td{font-weight:500;border-top:0.5px solid #ccc;border-bottom:none}
 <script>
 let updating=false;
 const SCENARIOS=[50,75,100,125,150];
+const STORAGE_KEY='commissionCalcInputs';
+const STORAGE_FIELDS=['exRate','salM1','salPct','comPct','qM1','qM2','ratM1','ratM2','gpM1usd','gpM1thb','gpM2usd','gpM2thb'];
+
+function saveToStorage(){
+  const data={};
+  STORAGE_FIELDS.forEach(id=>{data[id]=document.getElementById(id).value;});
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(data));
+  const msg=document.getElementById('saveMsg');
+  msg.textContent='Saved';
+  setTimeout(()=>{msg.textContent='';},2000);
+}
+
+function loadFromStorage(){
+  const raw=localStorage.getItem(STORAGE_KEY);
+  if(!raw)return;
+  try{
+    const data=JSON.parse(raw);
+    STORAGE_FIELDS.forEach(id=>{
+      if(data[id]!==undefined)document.getElementById(id).value=data[id];
+    });
+  }catch(e){}
+}
 
 function fmt(n){return Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}
 function fmtI(n){return Number(n).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0})}
@@ -265,6 +293,9 @@ document.getElementById('gpM2thb').addEventListener('input',()=>syncGP('m2thb'))
   });
 });
 
+document.getElementById('saveBtn').addEventListener('click',saveToStorage);
+
+loadFromStorage();
 calc();
 </script>
 <div style="margin-top:2rem;padding-top:1rem;border-top:0.5px solid #ddd;font-size:11px;color:#999;text-align:right">version 260618</div>
