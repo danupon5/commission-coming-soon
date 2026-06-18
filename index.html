@@ -132,18 +132,14 @@ tr.total td{font-weight:500;border-top:0.5px solid #ccc;border-bottom:none}
     <div class="card" style="padding:0;overflow:hidden">
       <div class="tier-head"><span class="dot-m1"></span> M1 tier — GP target &amp; commission</div>
       <table class="scen-table">
-        <thead><tr>
-          <th>Achievement</th><th>GP target (USD)</th><th>GP target (THB)</th><th>Commission (THB)</th>
-        </tr></thead>
+        <thead><tr><th>Achievement</th><th>GP target (USD)</th><th>GP target (THB)</th><th>Commission (THB)</th></tr></thead>
         <tbody id="scen-m1"></tbody>
       </table>
     </div>
     <div class="card" style="padding:0;overflow:hidden">
       <div class="tier-head"><span class="dot-m2"></span> M2 tier — Rev target &amp; commission</div>
       <table class="scen-table">
-        <thead><tr>
-          <th>Achievement</th><th>Rev target (USD)</th><th>Rev target (THB)</th><th>Commission (THB)</th>
-        </tr></thead>
+        <thead><tr><th>Achievement</th><th>Rev target (USD)</th><th>Rev target (THB)</th><th>Commission (THB)</th></tr></thead>
         <tbody id="scen-m2"></tbody>
       </table>
     </div>
@@ -188,10 +184,11 @@ function calc(){
 
   const achM1=comTHB*(r1/total_r);
   const achM2=comTHB*(r2/total_r);
-  const comUsdM1=gpM1*(achM1/qM1);
-  const comUsdM2=gpM2*(achM2/qM2);
-  const comTHBM1=comUsdM1*ex;
-  const comTHBM2=comUsdM2*ex;
+
+  const comTHBM1=(gpM1/qM1)*achM1;
+  const comTHBM2=(gpM2/qM2)*achM2;
+  const comUsdM1=comTHBM1/ex;
+  const comUsdM2=comTHBM2/ex;
 
   document.getElementById('b-m1r').textContent=Math.round(r1*100/total_r)+'%';
   document.getElementById('b-m2r').textContent=Math.round(r2*100/total_r)+'%';
@@ -234,14 +231,12 @@ function calc(){
     let html='';
     SCENARIOS.forEach(pct=>{
       const gpTarget=quota*(pct/100);
-      const gpTargetThb=gpTarget*ex;
-      const comThb=gpTarget*(achPaid/quota)*ex;
+      const comThb=(pct/100)*achPaid;
       const isCur=Math.abs(curAch-pct)<0.5;
-      const cls=isCur?'cur':'';
       const pill=isCur
         ?`<span class="pct-pill" style="background:#e8f5ee;color:#1a7a4a">${pct}% ★</span>`
         :`<span class="pct-pill" style="background:#f0f0f0;color:#666">${pct}%</span>`;
-      html+=`<tr class="${cls}"><td>${pill}</td><td>$${fmtI(gpTarget)}</td><td>฿${fmtI(gpTargetThb)}</td><td>฿${fmtI(comThb)}</td></tr>`;
+      html+=`<tr class="${isCur?'cur':''}"><td>${pill}</td><td>$${fmtI(gpTarget)}</td><td>฿${fmtI(gpTarget*ex)}</td><td>฿${fmtI(comThb)}</td></tr>`;
     });
     document.getElementById(tbodyId).innerHTML=html;
   }
