@@ -14,8 +14,8 @@ h3{font-size:12px;font-weight:500;color:#666;margin-bottom:8px;text-transform:up
 .card{background:#fff;border:0.5px solid #ddd;border-radius:12px;padding:1rem}
 .field{display:flex;flex-direction:column;gap:4px}
 label{font-size:13px;color:#666}
-input[type=number]{width:100%;font-size:14px;padding:6px 10px;border:0.5px solid #ccc;border-radius:8px;outline:none;background:#fff;color:#1a1a1a}
-input[type=number]:focus{border-color:#888}
+input[type=number],input[type=text]{width:100%;font-size:14px;padding:6px 10px;border:0.5px solid #ccc;border-radius:8px;outline:none;background:#fff;color:#1a1a1a}
+input[type=number]:focus,input[type=text]:focus{border-color:#888}
 .derived{font-size:14px;padding:6px 10px;background:#f0f0f0;border-radius:8px;color:#1a1a1a;font-weight:500;border:0.5px solid #ddd}
 .tier-card{background:#fff;border:0.5px solid #ddd;border-radius:12px;padding:1rem;margin-bottom:12px}
 .tier-title{font-size:15px;font-weight:500;margin-bottom:12px;display:flex;align-items:center;gap:8px}
@@ -68,7 +68,7 @@ button:hover{background:#e6e6e6}
     </div>
     <div class="field">
       <label>Salary M1 (THB / month)</label>
-      <input type="number" id="salM1" value="100000" min="0">
+      <input type="text" inputmode="decimal" id="salM1" value="100000">
     </div>
     <div class="field">
       <label>Salary % : Commission %</label>
@@ -87,9 +87,9 @@ button:hover{background:#e6e6e6}
   <div style="margin-top:8px">
     <label style="font-size:13px;color:#666">Quota M1 : Quota M2 (USD)</label>
     <div class="split-wrap" style="margin-top:4px">
-      <input type="number" id="qM1" value="500000" min="0" style="flex:1;min-width:0">
+      <input type="text" inputmode="decimal" id="qM1" value="500000" style="flex:1;min-width:0">
       <span>:</span>
-      <input type="number" id="qM2" value="8000000" min="0" style="flex:1;min-width:0">
+      <input type="text" inputmode="decimal" id="qM2" value="8000000" style="flex:1;min-width:0">
     </div>
   </div>
   <div style="margin-top:8px">
@@ -113,16 +113,16 @@ button:hover{background:#e6e6e6}
       <div class="tier-title"><span class="dot-m1"></span>M1 tier <span class="badge" id="b-m1r">50%</span></div>
       <h3>Project GP</h3>
       <div class="gp-row">
-        <div><div class="cur-label">USD</div><input type="number" id="gpM1usd" value="1000" min="0"></div>
-        <div><div class="cur-label">THB</div><input type="number" id="gpM1thb" value="35000" min="0"></div>
+        <div><div class="cur-label">USD</div><input type="text" inputmode="decimal" id="gpM1usd" value="1000"></div>
+        <div><div class="cur-label">THB</div><input type="text" inputmode="decimal" id="gpM1thb" value="35000"></div>
       </div>
     </div>
     <div>
       <div class="tier-title"><span class="dot-m2"></span>M2 tier <span class="badge" id="b-m2r">50%</span></div>
       <h3>Project Rev</h3>
       <div class="gp-row">
-        <div><div class="cur-label">USD</div><input type="number" id="gpM2usd" value="5000000" min="0"></div>
-        <div><div class="cur-label">THB</div><input type="number" id="gpM2thb" value="175000000" min="0"></div>
+        <div><div class="cur-label">USD</div><input type="text" inputmode="decimal" id="gpM2usd" value="5000000"></div>
+        <div><div class="cur-label">THB</div><input type="text" inputmode="decimal" id="gpM2thb" value="175000000"></div>
       </div>
     </div>
   </div>
@@ -166,10 +166,43 @@ let updating=false;
 const SCENARIOS=[50,75,100,125,150];
 const STORAGE_KEY='commissionCalcInputs';
 const STORAGE_FIELDS=['exRate','salM1','salPct','comPct','qM1','qM2','ratM1','ratM2','gpM1usd','gpM1thb','gpM2usd','gpM2thb'];
+const COMMA_FIELDS=['salM1','qM1','qM2','gpM1usd','gpM1thb','gpM2usd','gpM2thb'];
+
+function stripCommas(s){return (s||'').replace(/,/g,'')}
+
+function formatCommaStr(raw){
+  if(raw===''||raw===undefined||raw===null)return'';
+  let clean=stripCommas(String(raw));
+  let neg=clean.startsWith('-');
+  if(neg)clean=clean.slice(1);
+  let[intPart,dec]=clean.split('.');
+  intPart=(intPart||'').replace(/[^0-9]/g,'')||'0';
+  intPart=intPart.replace(/\B(?=(\d{3})+(?!\d))/g,',');
+  let result=(neg?'-':'')+intPart;
+  if(dec!==undefined)result+='.'+dec.replace(/[^0-9]/g,'');
+  return result;
+}
+
+function setValComma(id,value){
+  document.getElementById(id).value=formatCommaStr(value);
+}
+
+function formatInputLive(e){
+  const el=e.target;
+  const cursorPos=el.selectionStart;
+  const digitsBefore=el.value.slice(0,cursorPos).replace(/[^0-9]/g,'').length;
+  el.value=formatCommaStr(el.value);
+  let count=0,pos=el.value.length;
+  for(let i=0;i<el.value.length;i++){
+    if(/[0-9]/.test(el.value[i]))count++;
+    if(count>=digitsBefore){pos=i+1;break;}
+  }
+  el.setSelectionRange(pos,pos);
+}
 
 function saveToStorage(){
   const data={};
-  STORAGE_FIELDS.forEach(id=>{data[id]=document.getElementById(id).value;});
+  STORAGE_FIELDS.forEach(id=>{data[id]=stripCommas(document.getElementById(id).value);});
   localStorage.setItem(STORAGE_KEY,JSON.stringify(data));
   const msg=document.getElementById('saveMsg');
   msg.textContent='Saved';
@@ -195,26 +228,26 @@ function syncGP(changed){
   if(updating)return;
   updating=true;
   const ex=getEx();
-  if(changed==='m1usd'){const v=parseFloat(document.getElementById('gpM1usd').value)||0;document.getElementById('gpM1thb').value=Math.round(v*ex);}
-  else if(changed==='m1thb'){const v=parseFloat(document.getElementById('gpM1thb').value)||0;document.getElementById('gpM1usd').value=(v/ex).toFixed(2);}
-  else if(changed==='m2usd'){const v=parseFloat(document.getElementById('gpM2usd').value)||0;document.getElementById('gpM2thb').value=Math.round(v*ex);}
-  else if(changed==='m2thb'){const v=parseFloat(document.getElementById('gpM2thb').value)||0;document.getElementById('gpM2usd').value=(v/ex).toFixed(2);}
+  if(changed==='m1usd'){const v=parseFloat(stripCommas(document.getElementById('gpM1usd').value))||0;setValComma('gpM1thb',Math.round(v*ex));}
+  else if(changed==='m1thb'){const v=parseFloat(stripCommas(document.getElementById('gpM1thb').value))||0;setValComma('gpM1usd',(v/ex).toFixed(2));}
+  else if(changed==='m2usd'){const v=parseFloat(stripCommas(document.getElementById('gpM2usd').value))||0;setValComma('gpM2thb',Math.round(v*ex));}
+  else if(changed==='m2thb'){const v=parseFloat(stripCommas(document.getElementById('gpM2thb').value))||0;setValComma('gpM2usd',(v/ex).toFixed(2));}
   updating=false;
   calc();
 }
 
 function calc(){
   const ex=getEx();
-  const salM1=parseFloat(document.getElementById('salM1').value)||0;
+  const salM1=parseFloat(stripCommas(document.getElementById('salM1').value))||0;
   const salPct=(parseFloat(document.getElementById('salPct').value)||60)/100;
   const comPct=(parseFloat(document.getElementById('comPct').value)||40)/100;
   const r1=parseFloat(document.getElementById('ratM1').value)||50;
   const r2=parseFloat(document.getElementById('ratM2').value)||50;
   const total_r=r1+r2;
-  const qM1=parseFloat(document.getElementById('qM1').value)||1;
-  const qM2=parseFloat(document.getElementById('qM2').value)||1;
-  const gpM1=parseFloat(document.getElementById('gpM1usd').value)||0;
-  const gpM2=parseFloat(document.getElementById('gpM2usd').value)||0;
+  const qM1=parseFloat(stripCommas(document.getElementById('qM1').value))||1;
+  const qM2=parseFloat(stripCommas(document.getElementById('qM2').value))||1;
+  const gpM1=parseFloat(stripCommas(document.getElementById('gpM1usd').value))||0;
+  const gpM2=parseFloat(stripCommas(document.getElementById('gpM2usd').value))||0;
 
   const comTHB=salPct>0?(salM1/salPct)*comPct*12:0;
   document.getElementById('comTHB-display').textContent='฿'+fmt(comTHB);
@@ -293,9 +326,17 @@ document.getElementById('gpM2thb').addEventListener('input',()=>syncGP('m2thb'))
   });
 });
 
+COMMA_FIELDS.forEach(id=>{
+  document.getElementById(id).addEventListener('input',formatInputLive);
+});
+
 document.getElementById('saveBtn').addEventListener('click',saveToStorage);
 
 loadFromStorage();
+COMMA_FIELDS.forEach(id=>{
+  const el=document.getElementById(id);
+  el.value=formatCommaStr(el.value);
+});
 calc();
 </script>
 <div style="margin-top:2rem;padding-top:1rem;border-top:0.5px solid #ddd;font-size:11px;color:#999;text-align:right">version 260618</div>
