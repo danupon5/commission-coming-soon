@@ -161,6 +161,19 @@ button:hover{background:#e6e6e6}
   </div>
 </div>
 
+<div class="card" style="margin-top:1.25rem">
+  <h3>Formula reference</h3>
+  <ol style="font-size:13px;line-height:1.7;padding-left:1.1rem;color:#1a1a1a">
+    <li><b>Commission THB (100% achievement)</b> = Salary M1 ÷ Salary% × Commission% × 12</li>
+    <li><b>Achieve paid (THB) per tier</b> = Commission THB (100%) × (tier's ratio ÷ total of Ratio M1+M2)</li>
+    <li><b>Commission (THB) per tier</b> = (Project GP/Rev of tier (USD) ÷ Quota of tier (USD)) × Achieve paid (THB) of that tier</li>
+    <li><b>Commission (USD) per tier</b> = Commission (THB) ÷ Exchange rate</li>
+    <li><b>Achievement % per tier</b> = Project GP/Rev (USD) ÷ Quota (USD) × 100</li>
+    <li><b>Total commission</b> = sum of M1 + M2 commission (THB and USD)</li>
+    <li><b>Achievement scenarios (50/75/100/125/150%)</b> = Quota × scenario% gives the GP/Rev target; the same % × Achieve paid (THB) gives the commission at that achievement level</li>
+  </ol>
+</div>
+
 <script>
 let updating=false;
 const SCENARIOS=[50,75,100,125,150];
