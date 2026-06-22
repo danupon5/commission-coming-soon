@@ -284,7 +284,7 @@ function calc(){
   document.getElementById('metrics').innerHTML=`
     <div class="metric"><div class="metric-label">Commission THB (100%)</div><div class="metric-val">฿${fmtI(comTHB)}</div></div>
     <div class="metric"><div class="metric-label">Total commission (THB)</div><div class="metric-val pos">฿${fmtI(totalComTHB)}</div></div>
-    <div class="metric"><div class="metric-label">Total commission (USD)</div><div class="metric-val pos">$${fmtI(totalComUsd)}</div></div>
+    <div class="metric"><div class="metric-label">Total commission (USD)</div><div class="metric-val pos">$${fmt(totalComUsd)}</div></div>
     <div class="metric"><div class="metric-label">M1 achievement</div><div class="metric-val">${fmt(gpM1/qM1*100)}%</div></div>
     <div class="metric"><div class="metric-label">M2 achievement</div><div class="metric-val">${fmt(gpM2/qM2*100)}%</div></div>
   `;
