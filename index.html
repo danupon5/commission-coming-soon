@@ -168,9 +168,11 @@ button:hover{background:#e6e6e6}
     <thead><tr>
       <th>Month</th>
       <th>M1 target (USD)</th>
-      <th>M1 min to get paid (50%)</th>
+      <th>M1 target (THB)</th>
+      <th>M1 min to get paid (50%, THB)</th>
       <th>M2 target (USD)</th>
-      <th>M2 min to get paid (50%)</th>
+      <th>M2 target (THB)</th>
+      <th>M2 min to get paid (50%, THB)</th>
     </tr></thead>
     <tbody id="monthly-target"></tbody>
   </table>
@@ -186,14 +188,14 @@ button:hover{background:#e6e6e6}
     <li><b>Achievement % per tier</b> = Project GP/Rev (USD) ÷ Quota (USD) × 100</li>
     <li><b>Total commission</b> = sum of M1 + M2 commission (THB and USD)</li>
     <li><b>Achievement scenarios (50/75/100/125/150%)</b> = Quota × scenario% gives the GP/Rev target; the same % × Achieve paid (THB) gives the commission at that achievement level</li>
-    <li><b>Monthly target (Month N)</b> = (Quota M1 or M2 ÷ 12) × N (cumulative); commission is only paid once cumulative GP/Rev reaches at least 50% of that month's target</li>
+    <li><b>Monthly target (Month N)</b> = (Quota M1 or M2 ÷ 12) × N (cumulative); THB target = USD target × Exchange rate; commission is only paid once cumulative GP/Rev reaches at least 50% of that month's target</li>
   </ol>
 </div>
 
 <script>
 let updating=false;
 const SCENARIOS=[50,75,100,125,150];
-const FISCAL_MONTHS=['April','May','June','July','August','September','October','November','December','January','February','March'];
+const FISCAL_MONTHS=['APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC','JAN','FEB','MAR'];
 const STORAGE_KEY='commissionCalcInputs';
 const STORAGE_FIELDS=['exRate','salM1','salPct','comPct','qM1','qM2','ratM1','ratM2','gpM1usd','gpM1thb','gpM2usd','gpM2thb'];
 const COMMA_FIELDS=['salM1','qM1','qM2','gpM1usd','gpM1thb','gpM2usd','gpM2thb'];
@@ -348,7 +350,7 @@ function calc(){
   for(let m=1;m<=12;m++){
     const t1=qM1/12*m;
     const t2=qM2/12*m;
-    monthlyHtml+=`<tr><td>${FISCAL_MONTHS[m-1]}</td><td>$${fmtI(t1)}</td><td>$${fmtI(t1*0.5)}</td><td>$${fmtI(t2)}</td><td>$${fmtI(t2*0.5)}</td></tr>`;
+    monthlyHtml+=`<tr><td>Month${m} : ${FISCAL_MONTHS[m-1]}</td><td>$${fmtI(t1)}</td><td>฿${fmtI(t1*ex)}</td><td>฿${fmtI(t1*ex*0.5)}</td><td>$${fmtI(t2)}</td><td>฿${fmtI(t2*ex)}</td><td>฿${fmtI(t2*ex*0.5)}</td></tr>`;
   }
   document.getElementById('monthly-target').innerHTML=monthlyHtml;
 }
@@ -377,6 +379,6 @@ COMMA_FIELDS.forEach(id=>{
 });
 calc();
 </script>
-<div style="margin-top:2rem;padding-top:1rem;border-top:0.5px solid #ddd;font-size:11px;color:#999;text-align:right">version 260624b</div>
+<div style="margin-top:2rem;padding-top:1rem;border-top:0.5px solid #ddd;font-size:11px;color:#999;text-align:right">version 260624c</div>
 </body>
 </html>
