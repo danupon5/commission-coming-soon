@@ -193,6 +193,7 @@ button:hover{background:#e6e6e6}
 <script>
 let updating=false;
 const SCENARIOS=[50,75,100,125,150];
+const FISCAL_MONTHS=['April','May','June','July','August','September','October','November','December','January','February','March'];
 const STORAGE_KEY='commissionCalcInputs';
 const STORAGE_FIELDS=['exRate','salM1','salPct','comPct','qM1','qM2','ratM1','ratM2','gpM1usd','gpM1thb','gpM2usd','gpM2thb'];
 const COMMA_FIELDS=['salM1','qM1','qM2','gpM1usd','gpM1thb','gpM2usd','gpM2thb'];
@@ -347,7 +348,7 @@ function calc(){
   for(let m=1;m<=12;m++){
     const t1=qM1/12*m;
     const t2=qM2/12*m;
-    monthlyHtml+=`<tr><td>Month ${m}</td><td>$${fmtI(t1)}</td><td>$${fmtI(t1*0.5)}</td><td>$${fmtI(t2)}</td><td>$${fmtI(t2*0.5)}</td></tr>`;
+    monthlyHtml+=`<tr><td>${FISCAL_MONTHS[m-1]}</td><td>$${fmtI(t1)}</td><td>$${fmtI(t1*0.5)}</td><td>$${fmtI(t2)}</td><td>$${fmtI(t2*0.5)}</td></tr>`;
   }
   document.getElementById('monthly-target').innerHTML=monthlyHtml;
 }
@@ -376,6 +377,6 @@ COMMA_FIELDS.forEach(id=>{
 });
 calc();
 </script>
-<div style="margin-top:2rem;padding-top:1rem;border-top:0.5px solid #ddd;font-size:11px;color:#999;text-align:right">version 260624</div>
+<div style="margin-top:2rem;padding-top:1rem;border-top:0.5px solid #ddd;font-size:11px;color:#999;text-align:right">version 260624b</div>
 </body>
 </html>
