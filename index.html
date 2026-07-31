@@ -50,6 +50,17 @@ tr.total td{font-weight:500;border-top:0.5px solid #ccc;border-bottom:none}
 .scen-table td{text-align:right;padding:7px 10px;border-bottom:0.5px solid #eee;font-size:12px}
 .scen-table td:first-child{text-align:left}
 .scen-table tr.cur td{color:#1a7a4a;font-weight:500;background:#e8f5ee}
+/* Monthly breakdown table */
+.mt-wrap{overflow-x:auto}
+.mt{width:100%;border-collapse:collapse;font-size:12px;min-width:700px}
+.mt th{text-align:right;padding:7px 10px;font-weight:500;font-size:11px;color:#666;border-bottom:0.5px solid #ddd;white-space:nowrap;background:#f0f0f0}
+.mt th:first-child{text-align:left}
+.mt th.hl{background:#fff3cc;color:#7a5000}
+.mt td{text-align:right;padding:7px 10px;border-bottom:0.5px solid #eee;font-size:12px}
+.mt td:first-child{text-align:left;font-weight:500}
+.mt tr.even td{background:#fff}
+.mt tr.odd td{background:#f8f8f8}
+.mt tr.even td.hl,.mt tr.odd td.hl{background:#fff8e6;color:#7a5000;font-weight:500}
 .tier-head{font-size:12px;font-weight:500;color:#666;padding:6px 10px;background:#f8f8f8;border-bottom:0.5px solid #ddd}
 .pct-pill{display:inline-block;padding:1px 7px;border-radius:10px;font-size:11px;font-weight:500}
 button{font-size:13px;padding:7px 14px;border-radius:8px;border:0.5px solid #ccc;background:#f0f0f0;color:#1a1a1a;cursor:pointer}
@@ -164,20 +175,22 @@ button:hover{background:#e6e6e6}
 <div class="card" style="margin-top:1.25rem">
   <h3>Monthly target</h3>
   <p style="font-size:13px;color:#555;margin:0 0 10px">Commission is paid only once cumulative achievement reaches at least 50% of the cumulative monthly target. Targets below are cumulative: Month N target = (Quota ÷ 12) × N.</p>
-  <table class="scen-table">
+  <div class="mt-wrap">
+  <table class="mt">
     <thead><tr>
       <th>Month</th>
       <th>M1 target (USD)</th>
-      <th>M1 min to get paid (50%, USD)</th>
+      <th class="hl">M1 min 50% (USD)</th>
       <th>M1 target (THB)</th>
-      <th>M1 min to get paid (50%, THB)</th>
+      <th class="hl">M1 min 50% (THB)</th>
       <th>M2 target (USD)</th>
-      <th>M2 min to get paid (50%, USD)</th>
+      <th class="hl">M2 min 50% (USD)</th>
       <th>M2 target (THB)</th>
-      <th>M2 min to get paid (50%, THB)</th>
+      <th class="hl">M2 min 50% (THB)</th>
     </tr></thead>
     <tbody id="monthly-target"></tbody>
   </table>
+  </div>
 </div>
 
 <div class="card" style="margin-top:1.25rem">
@@ -352,7 +365,18 @@ function calc(){
   for(let m=1;m<=12;m++){
     const t1=qM1/12*m;
     const t2=qM2/12*m;
-    monthlyHtml+=`<tr><td>Month${m} : ${FISCAL_MONTHS[m-1]}</td><td>$${fmtI(t1)}</td><td>$${fmtI(t1*0.5)}</td><td>฿${fmtI(t1*ex)}</td><td>฿${fmtI(t1*ex*0.5)}</td><td>$${fmtI(t2)}</td><td>$${fmtI(t2*0.5)}</td><td>฿${fmtI(t2*ex)}</td><td>฿${fmtI(t2*ex*0.5)}</td></tr>`;
+    const cls=m%2===0?'even':'odd';
+    monthlyHtml+=`<tr class="${cls}">
+      <td>Month${m} : ${FISCAL_MONTHS[m-1]}</td>
+      <td>$${fmtI(t1)}</td>
+      <td class="hl">$${fmtI(t1*0.5)}</td>
+      <td>฿${fmtI(t1*ex)}</td>
+      <td class="hl">฿${fmtI(t1*ex*0.5)}</td>
+      <td>$${fmtI(t2)}</td>
+      <td class="hl">$${fmtI(t2*0.5)}</td>
+      <td>฿${fmtI(t2*ex)}</td>
+      <td class="hl">฿${fmtI(t2*ex*0.5)}</td>
+    </tr>`;
   }
   document.getElementById('monthly-target').innerHTML=monthlyHtml;
 }
