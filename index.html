@@ -14,8 +14,8 @@ h3{font-size:12px;font-weight:500;color:#666;margin-bottom:8px;text-transform:up
 .card{background:#fff;border:0.5px solid #ddd;border-radius:12px;padding:1rem}
 .field{display:flex;flex-direction:column;gap:4px}
 label{font-size:13px;color:#666}
-input[type=text],input[type=number]{width:100%;font-size:14px;padding:6px 10px;border:0.5px solid #ccc;border-radius:8px;outline:none;background:#fff;color:#1a1a1a}
-input:focus{border-color:#888}
+input[type=number],input[type=text]{width:100%;font-size:14px;padding:6px 10px;border:0.5px solid #ccc;border-radius:8px;outline:none;background:#fff;color:#1a1a1a}
+input[type=number]:focus,input[type=text]:focus{border-color:#888}
 .derived{font-size:14px;padding:6px 10px;background:#f0f0f0;border-radius:8px;color:#1a1a1a;font-weight:500;border:0.5px solid #ddd}
 .tier-card{background:#fff;border:0.5px solid #ddd;border-radius:12px;padding:1rem;margin-bottom:12px}
 .tier-title{font-size:15px;font-weight:500;margin-bottom:12px;display:flex;align-items:center;gap:8px}
@@ -44,25 +44,16 @@ tr.total td{font-weight:500;border-top:0.5px solid #ccc;border-bottom:none}
 .formula-hint{font-size:11px;color:#999;margin-top:4px}
 .split-wrap{display:flex;gap:6px;align-items:center}
 .split-wrap span{font-size:13px;color:#666}
-
-/* Monthly target table */
-.monthly-wrap{margin-top:2rem}
-.monthly-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.monthly-card{background:#fff;border:0.5px solid #ddd;border-radius:12px;overflow:hidden}
-.monthly-head{padding:10px 14px;display:flex;align-items:center;gap:8px;border-bottom:0.5px solid #ddd;background:#f8f8f8}
-.monthly-head-label{font-size:13px;font-weight:500}
-.mt{width:100%;border-collapse:collapse;font-size:12px}
-.mt th{padding:7px 12px;font-size:11px;font-weight:500;color:#666;text-align:right;background:#f8f8f8;border-bottom:0.5px solid #ddd;white-space:nowrap}
-.mt th:first-child{text-align:left}
-.mt td{padding:8px 12px;text-align:right;border-bottom:0.5px solid #eee}
-.mt td:first-child{text-align:left;font-weight:500}
-.mt tr:last-child td{border-bottom:none}
-.mt tr.even td{background:#fff}
-.mt tr.odd td{background:#f8f8f8}
-.mt tr.half td{background:#fff8e6 !important;color:#7a5000;font-weight:500}
-.mt tr.cur td{background:#e8f5ee !important;color:#1a7a4a;font-weight:500}
-.pct-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:500}
-.version{margin-top:2rem;padding-top:1rem;border-top:0.5px solid #ddd;font-size:11px;color:#999;text-align:right}
+.scen-table{width:100%;border-collapse:collapse;font-size:13px}
+.scen-table th{text-align:right;padding:7px 10px;font-weight:500;font-size:11px;color:#666;border-bottom:0.5px solid #ddd;white-space:nowrap;background:#f8f8f8}
+.scen-table th:first-child{text-align:left}
+.scen-table td{text-align:right;padding:7px 10px;border-bottom:0.5px solid #eee;font-size:12px}
+.scen-table td:first-child{text-align:left}
+.scen-table tr.cur td{color:#1a7a4a;font-weight:500;background:#e8f5ee}
+.tier-head{font-size:12px;font-weight:500;color:#666;padding:6px 10px;background:#f8f8f8;border-bottom:0.5px solid #ddd}
+.pct-pill{display:inline-block;padding:1px 7px;border-radius:10px;font-size:11px;font-weight:500}
+button{font-size:13px;padding:7px 14px;border-radius:8px;border:0.5px solid #ccc;background:#f0f0f0;color:#1a1a1a;cursor:pointer}
+button:hover{background:#e6e6e6}
 </style>
 </head>
 <body>
@@ -73,11 +64,11 @@ tr.total td{font-weight:500;border-top:0.5px solid #ccc;border-bottom:none}
   <div class="grid">
     <div class="field">
       <label>Exchange rate (THB/USD)</label>
-      <input type="text" id="exRate" value="35">
+      <input type="number" id="exRate" value="35" min="1">
     </div>
     <div class="field">
       <label>Salary M1 (THB / month)</label>
-      <input type="text" id="salM1" value="100,000">
+      <input type="text" inputmode="decimal" id="salM1" value="100000">
     </div>
     <div class="field">
       <label>Salary % : Commission %</label>
@@ -89,8 +80,16 @@ tr.total td{font-weight:500;border-top:0.5px solid #ccc;border-bottom:none}
     </div>
     <div class="field">
       <label>Commission THB (100% achievement)</label>
-      <div class="derived" id="comTHB-display">฿800,000.00</div>
+      <div class="derived" id="comTHB-display">฿800,000</div>
       <div class="formula-hint">= Salary M1 ÷ Salary% × Com% × 12</div>
+    </div>
+  </div>
+  <div style="margin-top:8px">
+    <label style="font-size:13px;color:#666">Quota M1 : Quota M2 (USD)</label>
+    <div class="split-wrap" style="margin-top:4px">
+      <input type="text" inputmode="decimal" id="qM1" value="500000" style="flex:1;min-width:0">
+      <span>:</span>
+      <input type="text" inputmode="decimal" id="qM2" value="8000000" style="flex:1;min-width:0">
     </div>
   </div>
   <div style="margin-top:8px">
@@ -101,25 +100,30 @@ tr.total td{font-weight:500;border-top:0.5px solid #ccc;border-bottom:none}
       <input type="number" id="ratM2" value="50" min="1" max="99" style="width:60px">
     </div>
   </div>
+  <div style="margin-top:12px;display:flex;align-items:center;gap:10px">
+    <button type="button" id="saveBtn">Save to local storage</button>
+    <span id="saveMsg" style="font-size:12px;color:#1a7a4a"></span>
+  </div>
 </div>
 
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1.25rem">
-  <div class="tier-card">
-    <div class="tier-title"><span class="dot-m1"></span>M1 tier <span class="badge" id="b-m1r">50%</span></div>
-    <div class="field" style="margin-bottom:12px"><label>Quota M1 (USD)</label><input type="text" id="qM1" value="1,000,000"></div>
-    <h3>Project GP</h3>
-    <div class="gp-row">
-      <div><div class="cur-label">USD</div><input type="text" id="gpM1usd" value="1,000"></div>
-      <div><div class="cur-label">THB</div><input type="text" id="gpM1thb" value="35,000"></div>
+<div class="tier-card" style="margin-bottom:1.25rem">
+  <h3>Commission calculator</h3>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+    <div>
+      <div class="tier-title"><span class="dot-m1"></span>M1 tier <span class="badge" id="b-m1r">50%</span></div>
+      <h3>Project GP</h3>
+      <div class="gp-row">
+        <div><div class="cur-label">USD</div><input type="text" inputmode="decimal" id="gpM1usd" value="1000"></div>
+        <div><div class="cur-label">THB</div><input type="text" inputmode="decimal" id="gpM1thb" value="35000"></div>
+      </div>
     </div>
-  </div>
-  <div class="tier-card">
-    <div class="tier-title"><span class="dot-m2"></span>M2 tier <span class="badge" id="b-m2r">50%</span></div>
-    <div class="field" style="margin-bottom:12px"><label>Quota M2 (USD)</label><input type="text" id="qM2" value="8,000,000"></div>
-    <h3>Project Rev</h3>
-    <div class="gp-row">
-      <div><div class="cur-label">USD</div><input type="text" id="gpM2usd" value="5,000,000"></div>
-      <div><div class="cur-label">THB</div><input type="text" id="gpM2thb" value="175,000,000"></div>
+    <div>
+      <div class="tier-title"><span class="dot-m2"></span>M2 tier <span class="badge" id="b-m2r">50%</span></div>
+      <h3>Project Rev</h3>
+      <div class="gp-row">
+        <div><div class="cur-label">USD</div><input type="text" inputmode="decimal" id="gpM2usd" value="5000000"></div>
+        <div><div class="cur-label">THB</div><input type="text" inputmode="decimal" id="gpM2thb" value="175000000"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -137,93 +141,154 @@ tr.total td{font-weight:500;border-top:0.5px solid #ccc;border-bottom:none}
   </table>
 </div>
 
-<div class="monthly-wrap">
-  <h3>Monthly target</h3>
-  <div class="monthly-grid">
-    <div class="monthly-card">
-      <div class="monthly-head"><span class="dot-m1"></span><span class="monthly-head-label">M1 tier</span></div>
-      <table class="mt">
-        <thead><tr>
-          <th>Achievement</th><th>Monthly GP (USD)</th><th>Monthly GP (THB)</th><th>Commission (THB)</th>
-        </tr></thead>
+<div class="result-section" style="margin-top:2rem">
+  <h3>Achievement scenarios</h3>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+    <div class="card" style="padding:0;overflow:hidden">
+      <div class="tier-head"><span class="dot-m1"></span> M1 tier — GP target &amp; commission</div>
+      <table class="scen-table">
+        <thead><tr><th>Achievement</th><th>GP target (USD)</th><th>GP target (THB)</th><th>Commission (THB)</th></tr></thead>
         <tbody id="scen-m1"></tbody>
       </table>
     </div>
-    <div class="monthly-card">
-      <div class="monthly-head"><span class="dot-m2"></span><span class="monthly-head-label">M2 tier</span></div>
-      <table class="mt">
-        <thead><tr>
-          <th>Achievement</th><th>Monthly Rev (USD)</th><th>Monthly Rev (THB)</th><th>Commission (THB)</th>
-        </tr></thead>
+    <div class="card" style="padding:0;overflow:hidden">
+      <div class="tier-head"><span class="dot-m2"></span> M2 tier — Rev target &amp; commission</div>
+      <table class="scen-table">
+        <thead><tr><th>Achievement</th><th>Rev target (USD)</th><th>Rev target (THB)</th><th>Commission (THB)</th></tr></thead>
         <tbody id="scen-m2"></tbody>
       </table>
     </div>
   </div>
 </div>
 
-<div class="version">version 260618</div>
+<div class="card" style="margin-top:1.25rem">
+  <h3>Monthly target</h3>
+  <p style="font-size:13px;color:#555;margin:0 0 10px">Commission is paid only once cumulative achievement reaches at least 50% of the cumulative monthly target. Targets below are cumulative: Month N target = (Quota ÷ 12) × N.</p>
+  <table class="scen-table">
+    <thead><tr>
+      <th>Month</th>
+      <th>M1 target (USD)</th>
+      <th>M1 min to get paid (50%, USD)</th>
+      <th>M1 target (THB)</th>
+      <th>M1 min to get paid (50%, THB)</th>
+      <th>M2 target (USD)</th>
+      <th>M2 min to get paid (50%, USD)</th>
+      <th>M2 target (THB)</th>
+      <th>M2 min to get paid (50%, THB)</th>
+    </tr></thead>
+    <tbody id="monthly-target"></tbody>
+  </table>
+</div>
+
+<div class="card" style="margin-top:1.25rem">
+  <h3>Formula reference</h3>
+  <ol style="font-size:13px;line-height:1.7;padding-left:1.1rem;color:#1a1a1a">
+    <li><b>Commission THB (100% achievement)</b> = Salary M1 ÷ Salary% × Commission% × 12</li>
+    <li><b>Achieve paid (THB) per tier</b> = Commission THB (100%) × (tier's ratio ÷ total of Ratio M1+M2)</li>
+    <li><b>Commission (THB) per tier</b> = (Project GP/Rev of tier (USD) ÷ Quota of tier (USD)) × Achieve paid (THB) of that tier</li>
+    <li><b>Commission (USD) per tier</b> = Commission (THB) ÷ Exchange rate</li>
+    <li><b>Achievement % per tier</b> = Project GP/Rev (USD) ÷ Quota (USD) × 100</li>
+    <li><b>Total commission</b> = sum of M1 + M2 commission (THB and USD)</li>
+    <li><b>Achievement scenarios (50/75/100/125/150%)</b> = Quota × scenario% gives the GP/Rev target; the same % × Achieve paid (THB) gives the commission at that achievement level</li>
+    <li><b>Monthly target (Month N)</b> = (Quota M1 or M2 ÷ 12) × N (cumulative); THB target = USD target × Exchange rate; min to get paid (50%) = target × 0.5 in USD and THB; commission is only paid once cumulative GP/Rev reaches at least 50% of that month's target</li>
+  </ol>
+</div>
 
 <script>
 let updating=false;
 const SCENARIOS=[50,75,100,125,150];
+const FISCAL_MONTHS=['APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC','JAN','FEB','MAR'];
+const STORAGE_KEY='commissionCalcInputs';
+const STORAGE_FIELDS=['exRate','salM1','salPct','comPct','qM1','qM2','ratM1','ratM2','gpM1usd','gpM1thb','gpM2usd','gpM2thb'];
+const COMMA_FIELDS=['salM1','qM1','qM2','gpM1usd','gpM1thb','gpM2usd','gpM2thb'];
 
-function parseVal(id){return parseFloat(String(document.getElementById(id).value).replace(/,/g,''))||0}
+function stripCommas(s){return (s||'').replace(/,/g,'')}
+
+function formatCommaStr(raw){
+  if(raw===''||raw===undefined||raw===null)return'';
+  let clean=stripCommas(String(raw));
+  let neg=clean.startsWith('-');
+  if(neg)clean=clean.slice(1);
+  let[intPart,dec]=clean.split('.');
+  intPart=(intPart||'').replace(/[^0-9]/g,'')||'0';
+  intPart=intPart.replace(/\B(?=(\d{3})+(?!\d))/g,',');
+  let result=(neg?'-':'')+intPart;
+  if(dec!==undefined)result+='.'+dec.replace(/[^0-9]/g,'');
+  return result;
+}
+
+function setValComma(id,value){
+  document.getElementById(id).value=formatCommaStr(value);
+}
+
+function formatInputLive(e){
+  const el=e.target;
+  const cursorPos=el.selectionStart;
+  const digitsBefore=el.value.slice(0,cursorPos).replace(/[^0-9]/g,'').length;
+  el.value=formatCommaStr(el.value);
+  let count=0,pos=el.value.length;
+  for(let i=0;i<el.value.length;i++){
+    if(/[0-9]/.test(el.value[i]))count++;
+    if(count>=digitsBefore){pos=i+1;break;}
+  }
+  el.setSelectionRange(pos,pos);
+}
+
+function saveToStorage(){
+  const data={};
+  STORAGE_FIELDS.forEach(id=>{data[id]=stripCommas(document.getElementById(id).value);});
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(data));
+  const msg=document.getElementById('saveMsg');
+  msg.textContent='Saved';
+  setTimeout(()=>{msg.textContent='';},2000);
+}
+
+function loadFromStorage(){
+  const raw=localStorage.getItem(STORAGE_KEY);
+  if(!raw)return;
+  try{
+    const data=JSON.parse(raw);
+    STORAGE_FIELDS.forEach(id=>{
+      if(data[id]!==undefined)document.getElementById(id).value=data[id];
+    });
+  }catch(e){}
+}
+
 function fmt(n){return Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}
 function fmtI(n){return Number(n).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0})}
-function getEx(){return parseVal('exRate')||35}
-
-function setupFmt(id){
-  const el=document.getElementById(id);
-  el.addEventListener('focus',()=>{el.value=el.value.replace(/,/g,'')});
-  el.addEventListener('blur',()=>{
-    const n=parseFloat(el.value);
-    if(!isNaN(n))el.value=n.toLocaleString('en-US');
-    calc();
-  });
-  el.addEventListener('input',calc);
-}
+function getEx(){return parseFloat(document.getElementById('exRate').value)||35}
 
 function syncGP(changed){
   if(updating)return;
   updating=true;
   const ex=getEx();
-  if(changed==='m1usd'){document.getElementById('gpM1thb').value=Math.round(parseVal('gpM1usd')*ex).toLocaleString('en-US');}
-  else if(changed==='m1thb'){document.getElementById('gpM1usd').value=(parseVal('gpM1thb')/ex).toLocaleString('en-US',{maximumFractionDigits:2});}
-  else if(changed==='m2usd'){document.getElementById('gpM2thb').value=Math.round(parseVal('gpM2usd')*ex).toLocaleString('en-US');}
-  else if(changed==='m2thb'){document.getElementById('gpM2usd').value=(parseVal('gpM2thb')/ex).toLocaleString('en-US',{maximumFractionDigits:2});}
+  if(changed==='m1usd'){const v=parseFloat(stripCommas(document.getElementById('gpM1usd').value))||0;setValComma('gpM1thb',Math.round(v*ex));}
+  else if(changed==='m1thb'){const v=parseFloat(stripCommas(document.getElementById('gpM1thb').value))||0;setValComma('gpM1usd',(v/ex).toFixed(2));}
+  else if(changed==='m2usd'){const v=parseFloat(stripCommas(document.getElementById('gpM2usd').value))||0;setValComma('gpM2thb',Math.round(v*ex));}
+  else if(changed==='m2thb'){const v=parseFloat(stripCommas(document.getElementById('gpM2thb').value))||0;setValComma('gpM2usd',(v/ex).toFixed(2));}
   updating=false;
   calc();
 }
 
-function setupGPFmt(id,syncKey){
-  const el=document.getElementById(id);
-  el.addEventListener('focus',()=>{el.value=el.value.replace(/,/g,'')});
-  el.addEventListener('blur',()=>{
-    const n=parseFloat(el.value);
-    if(!isNaN(n))el.value=n.toLocaleString('en-US');
-    syncGP(syncKey);
-  });
-  el.addEventListener('input',()=>syncGP(syncKey));
-}
-
 function calc(){
   const ex=getEx();
-  const salM1=parseVal('salM1');
+  const salM1=parseFloat(stripCommas(document.getElementById('salM1').value))||0;
   const salPct=(parseFloat(document.getElementById('salPct').value)||60)/100;
   const comPct=(parseFloat(document.getElementById('comPct').value)||40)/100;
   const r1=parseFloat(document.getElementById('ratM1').value)||50;
   const r2=parseFloat(document.getElementById('ratM2').value)||50;
   const total_r=r1+r2;
-  const qM1=parseVal('qM1')||1;
-  const qM2=parseVal('qM2')||1;
-  const gpM1=parseVal('gpM1usd');
-  const gpM2=parseVal('gpM2usd');
+  const qM1=parseFloat(stripCommas(document.getElementById('qM1').value))||1;
+  const qM2=parseFloat(stripCommas(document.getElementById('qM2').value))||1;
+  const gpM1=parseFloat(stripCommas(document.getElementById('gpM1usd').value))||0;
+  const gpM2=parseFloat(stripCommas(document.getElementById('gpM2usd').value))||0;
 
   const comTHB=salPct>0?(salM1/salPct)*comPct*12:0;
   document.getElementById('comTHB-display').textContent='฿'+fmt(comTHB);
 
   const achM1=comTHB*(r1/total_r);
   const achM2=comTHB*(r2/total_r);
+
   const comTHBM1=(gpM1/qM1)*achM1;
   const comTHBM2=(gpM2/qM2)*achM2;
   const comUsdM1=comTHBM1/ex;
@@ -239,8 +304,8 @@ function calc(){
 
   document.getElementById('metrics').innerHTML=`
     <div class="metric"><div class="metric-label">Commission THB (100%)</div><div class="metric-val">฿${fmtI(comTHB)}</div></div>
-    <div class="metric"><div class="metric-label">Total commission (THB)</div><div class="metric-val pos">฿${fmtI(totalComTHB)}</div></div>
-    <div class="metric"><div class="metric-label">Total commission (USD)</div><div class="metric-val pos">$${fmtI(totalComUsd)}</div></div>
+    <div class="metric"><div class="metric-label">Total commission (THB)</div><div class="metric-val pos">฿${fmt(totalComTHB)}</div></div>
+    <div class="metric"><div class="metric-label">Total commission (USD)</div><div class="metric-val pos">$${fmt(totalComUsd)}</div></div>
     <div class="metric"><div class="metric-label">M1 achievement</div><div class="metric-val">${fmt(gpM1/qM1*100)}%</div></div>
     <div class="metric"><div class="metric-label">M2 achievement</div><div class="metric-val">${fmt(gpM2/qM2*100)}%</div></div>
   `;
@@ -268,34 +333,54 @@ function calc(){
 
   function scenRows(quota,achPaid,curAch,ex,tbodyId){
     let html='';
-    SCENARIOS.forEach((pct,i)=>{
-      const gpMonthly=quota*(pct/100)/12;
+    SCENARIOS.forEach(pct=>{
+      const gpTarget=quota*(pct/100);
       const comThb=(pct/100)*achPaid;
       const isCur=Math.abs(curAch-pct)<0.5;
-      const isHalf=pct===50;
-      const cls=isCur?'cur':isHalf?'half':(i%2===0?'even':'odd');
-      let pillStyle,pillText;
-      if(isCur){pillStyle='background:#e8f5ee;color:#1a7a4a';pillText=pct+'% ★';}
-      else if(isHalf){pillStyle='background:#fff8e6;color:#7a5000';pillText='50%';}
-      else{pillStyle='background:#f0f0f0;color:#666';pillText=pct+'%';}
-      html+=`<tr class="${cls}"><td><span class="pct-badge" style="${pillStyle}">${pillText}</span></td><td>$${fmtI(gpMonthly)}</td><td>฿${fmtI(gpMonthly*ex)}</td><td>฿${fmtI(comThb)}</td></tr>`;
+      const pill=isCur
+        ?`<span class="pct-pill" style="background:#e8f5ee;color:#1a7a4a">${pct}% ★</span>`
+        :`<span class="pct-pill" style="background:#f0f0f0;color:#666">${pct}%</span>`;
+      html+=`<tr class="${isCur?'cur':''}"><td>${pill}</td><td>$${fmtI(gpTarget)}</td><td>฿${fmtI(gpTarget*ex)}</td><td>฿${fmtI(comThb)}</td></tr>`;
     });
     document.getElementById(tbodyId).innerHTML=html;
   }
 
   scenRows(qM1,achM1,curAchM1,ex,'scen-m1');
   scenRows(qM2,achM2,curAchM2,ex,'scen-m2');
+
+  let monthlyHtml='';
+  for(let m=1;m<=12;m++){
+    const t1=qM1/12*m;
+    const t2=qM2/12*m;
+    monthlyHtml+=`<tr><td>Month${m} : ${FISCAL_MONTHS[m-1]}</td><td>$${fmtI(t1)}</td><td>$${fmtI(t1*0.5)}</td><td>฿${fmtI(t1*ex)}</td><td>฿${fmtI(t1*ex*0.5)}</td><td>$${fmtI(t2)}</td><td>$${fmtI(t2*0.5)}</td><td>฿${fmtI(t2*ex)}</td><td>฿${fmtI(t2*ex*0.5)}</td></tr>`;
+  }
+  document.getElementById('monthly-target').innerHTML=monthlyHtml;
 }
 
-['exRate','salM1','qM1','qM2'].forEach(setupFmt);
-setupGPFmt('gpM1usd','m1usd');
-setupGPFmt('gpM1thb','m1thb');
-setupGPFmt('gpM2usd','m2usd');
-setupGPFmt('gpM2thb','m2thb');
-['salPct','comPct','ratM1','ratM2'].forEach(id=>{
-  document.getElementById(id).addEventListener('input',calc);
+document.getElementById('gpM1usd').addEventListener('input',()=>syncGP('m1usd'));
+document.getElementById('gpM1thb').addEventListener('input',()=>syncGP('m1thb'));
+document.getElementById('gpM2usd').addEventListener('input',()=>syncGP('m2usd'));
+document.getElementById('gpM2thb').addEventListener('input',()=>syncGP('m2thb'));
+
+['exRate','salM1','salPct','comPct','ratM1','ratM2','qM1','qM2'].forEach(id=>{
+  document.getElementById(id).addEventListener('input',()=>{
+    if(id==='exRate'){syncGP('m1usd');syncGP('m2usd');}else{calc();}
+  });
+});
+
+COMMA_FIELDS.forEach(id=>{
+  document.getElementById(id).addEventListener('input',formatInputLive);
+});
+
+document.getElementById('saveBtn').addEventListener('click',saveToStorage);
+
+loadFromStorage();
+COMMA_FIELDS.forEach(id=>{
+  const el=document.getElementById(id);
+  el.value=formatCommaStr(el.value);
 });
 calc();
 </script>
+<div style="margin-top:2rem;padding-top:1rem;border-top:0.5px solid #ddd;font-size:11px;color:#999;text-align:right">version 260624d</div>
 </body>
 </html>
