@@ -65,14 +65,24 @@ tr.total td{font-weight:500;border-top:0.5px solid #ccc;border-bottom:none}
 .pct-pill{display:inline-block;padding:1px 7px;border-radius:10px;font-size:11px;font-weight:500}
 button{font-size:13px;padding:7px 14px;border-radius:8px;border:0.5px solid #ccc;background:#f0f0f0;color:#1a1a1a;cursor:pointer}
 button:hover{background:#e6e6e6}
+.collapsible-header{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none}
+.collapsible-header h3{margin:0}
+.toggle-btn{font-size:12px;color:#666;background:none;border:0.5px solid #ccc;border-radius:6px;padding:2px 10px;cursor:pointer;line-height:1.6}
+.toggle-btn:hover{background:#e6e6e6}
+.collapsible-body{overflow:hidden;transition:max-height .25s ease,opacity .25s ease;max-height:600px;opacity:1}
+.collapsible-body.collapsed{max-height:0;opacity:0;pointer-events:none}
 </style>
 </head>
 <body>
 <h2>Commission calculator</h2>
 
 <div class="card" style="margin-bottom:12px">
-  <h3>Global settings</h3>
-  <div class="grid">
+  <div class="collapsible-header" onclick="toggleSettings()">
+    <h3 style="margin:0">Global settings</h3>
+    <button class="toggle-btn" id="toggleBtn">▲ ย่อ</button>
+  </div>
+  <div class="collapsible-body" id="settingsBody">
+  <div style="margin-top:10px" class="grid">
     <div class="field">
       <label>Exchange rate (THB/USD)</label>
       <input type="number" id="exRate" value="35" min="1">
@@ -115,6 +125,7 @@ button:hover{background:#e6e6e6}
     <button type="button" id="saveBtn">Save to local storage</button>
     <span id="saveMsg" style="font-size:12px;color:#1a7a4a"></span>
   </div>
+  </div><!-- end collapsible-body -->
 </div>
 
 <div class="tier-card" style="margin-bottom:1.25rem">
@@ -397,6 +408,13 @@ COMMA_FIELDS.forEach(id=>{
 });
 
 document.getElementById('saveBtn').addEventListener('click',saveToStorage);
+
+function toggleSettings(){
+  const body=document.getElementById('settingsBody');
+  const btn=document.getElementById('toggleBtn');
+  const collapsed=body.classList.toggle('collapsed');
+  btn.textContent=collapsed?'▼ ขยาย':'▲ ย่อ';
+}
 
 loadFromStorage();
 COMMA_FIELDS.forEach(id=>{
